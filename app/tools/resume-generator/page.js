@@ -7,7 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Download, Plus, X } from 'lucide-react';
+import { Download, Plus, X, Copy, Check, Eye } from 'lucide-react';
+import { jsPDF } from 'jspdf';
 
 export default function ResumeGenerator() {
   const [personalInfo, setPersonalInfo] = useState({
@@ -32,6 +33,8 @@ export default function ResumeGenerator() {
   }]);
 
   const [skills, setSkills] = useState('');
+  const [showPreview, setShowPreview] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const addExperience = () => {
     setExperiences([...experiences, { title: '', company: '', duration: '', description: '' }]);
@@ -49,66 +52,169 @@ export default function ResumeGenerator() {
     setEducation(education.filter((_, i) => i !== index));
   };
 
-  const downloadResume = () => {
-    const resumeHTML = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>${personalInfo.name} - Resume</title>
-  <style>
-    body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6; }
-    h1 { color: #333; margin-bottom: 5px; }
-    h2 { color: #666; border-bottom: 2px solid #333; padding-bottom: 5px; margin-top: 25px; }
-    .contact { color: #666; margin-bottom: 20px; }
-    .section-item { margin-bottom: 20px; }
-    .job-title { font-weight: bold; }
-    .company { color: #666; }
-    .skills { display: flex; flex-wrap: wrap; gap: 10px; }
-    .skill { background: #f0f0f0; padding: 5px 15px; border-radius: 15px; }
-  </style>
-</head>
-<body>
-  <h1>${personalInfo.name}</h1>
-  <div class="contact">
-    ${personalInfo.email} | ${personalInfo.phone} | ${personalInfo.location}
-  </div>
-  
-  ${personalInfo.summary ? `<p>${personalInfo.summary}</p>` : ''}
-  
-  <h2>Experience</h2>
-  ${experiences.map(exp => `
-    <div class="section-item">
-      <div class="job-title">${exp.title}</div>
-      <div class="company">${exp.company} | ${exp.duration}</div>
-      <p>${exp.description}</p>
-    </div>
-  `).join('')}
-  
-  <h2>Education</h2>
-  ${education.map(edu => `
-    <div class="section-item">
-      <div class="job-title">${edu.degree}</div>
-      <div class="company">${edu.school} | ${edu.year}</div>
-    </div>
-  `).join('')}
-  
-  ${skills ? `
-    <h2>Skills</h2>
-    <div class="skills">
-      ${skills.split(',').map(skill => `<span class="skill">${skill.trim()}</span>`).join('')}
-    </div>
-  ` : ''}
-</body>
-</html>
-    `;
+  const generatePreview = () => {
+    setShowPreview(true);
+  };
 
-    const blob = new Blob([resumeHTML], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${personalInfo.name.replace(/\s+/g, '_')}_Resume.html`;
-    a.click();
+  const downloadPDF = () => {
+    const doc = new jsPDF();
+    let yPos = 20;
+
+    // Name (Bold, Large)
+    doc.setFontSize(24);
+    doc.setFont('helvetica', 'bold');
+    doc.text(personalInfo.name || 'Your Name', 20, yPos);
+    yPos += 10;
+
+    // Contact Info
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    const contactLine = `${personalInfo.email || ''} | ${personalInfo.phone || ''} | ${personalInfo.location || ''}`;
+    doc.text(contactLine, 20, yPos);
+    yPos += 8;
+
+    // Line separator
+    doc.setDrawColor(0, 0, 0);
+    doc.line(20, yPos, 190, yPos);
+    yPos += 10;
+
+    // Summary
+    if (personalInfo.summary) {
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('PROFESSIONAL SUMMARY', 20, yPos);
+      yPos += 7;
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      const summaryLines = doc.splitTextToSize(personalInfo.summary, 170);
+      doc.text(summaryLines, 20, yPos);
+      yPos += (summaryLines.length * 5) + 8;
+    }
+
+    // Experience Section
+    if (experiences.some(exp => exp.title || exp.company)) {
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('EXPERIENCE', 20, yPos);
+      yPos += 7;
+
+      experiences.forEach((exp, index) => {
+        if (exp.title || exp.company) {
+          // Job Title
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'bold');
+          doc.text(exp.title || 'Job Title', 20, yPos);
+          yPos += 5;
+
+          // Company and Duration
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'italic');
+          doc.text(`${exp.company || 'Company'} | ${exp.duration || 'Duration'}`, 20, yPos);
+          yPos += 5;
+
+          // Description
+          if (exp.description) {
+            doc.setFont('helvetica', 'normal');
+            const descLines = doc.splitTextToSize(exp.description, 170);
+            doc.text(descLines, 20, yPos);
+            yPos += (descLines.length * 5) + 3;
+          }
+          yPos += 3;
+
+          // Check if we need a new page
+          if (yPos > 270) {
+            doc.addPage();
+            yPos = 20;
+          }
+        }
+      });
+      yPos += 5;
+    }
+
+    // Education Section
+    if (education.some(edu => edu.degree || edu.school)) {
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('EDUCATION', 20, yPos);
+      yPos += 7;
+
+      education.forEach((edu) => {
+        if (edu.degree || edu.school) {
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'bold');
+          doc.text(edu.degree || 'Degree', 20, yPos);
+          yPos += 5;
+
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'italic');
+          doc.text(`${edu.school || 'School'} | ${edu.year || 'Year'}`, 20, yPos);
+          yPos += 8;
+        }
+      });
+    }
+
+    // Skills Section
+    if (skills) {
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('SKILLS', 20, yPos);
+      yPos += 7;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      const skillsText = skills.split(',').map(s => s.trim()).join(' • ');
+      const skillsLines = doc.splitTextToSize(skillsText, 170);
+      doc.text(skillsLines, 20, yPos);
+    }
+
+    // Save PDF
+    doc.save(`${personalInfo.name.replace(/\s+/g, '_') || 'Resume'}.pdf`);
+  };
+
+  const copyResume = () => {
+    let resumeText = `${personalInfo.name}\n`;
+    resumeText += `${personalInfo.email} | ${personalInfo.phone} | ${personalInfo.location}\n\n`;
+    
+    if (personalInfo.summary) {
+      resumeText += `PROFESSIONAL SUMMARY\n${personalInfo.summary}\n\n`;
+    }
+
+    resumeText += `EXPERIENCE\n`;
+    experiences.forEach(exp => {
+      if (exp.title || exp.company) {
+        resumeText += `${exp.title}\n`;
+        resumeText += `${exp.company} | ${exp.duration}\n`;
+        if (exp.description) resumeText += `${exp.description}\n`;
+        resumeText += `\n`;
+      }
+    });
+
+    resumeText += `EDUCATION\n`;
+    education.forEach(edu => {
+      if (edu.degree || edu.school) {
+        resumeText += `${edu.degree}\n`;
+        resumeText += `${edu.school} | ${edu.year}\n\n`;
+      }
+    });
+
+    if (skills) {
+      resumeText += `SKILLS\n${skills}\n`;
+    }
+
+    navigator.clipboard.writeText(resumeText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -122,7 +228,7 @@ export default function ResumeGenerator() {
           <h3 className="text-lg font-semibold mb-4">Personal Information</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Full Name</Label>
+              <Label>Full Name *</Label>
               <Input
                 value={personalInfo.name}
                 onChange={(e) => setPersonalInfo({ ...personalInfo, name: e.target.value })}
@@ -130,7 +236,7 @@ export default function ResumeGenerator() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Email</Label>
+              <Label>Email *</Label>
               <Input
                 value={personalInfo.email}
                 onChange={(e) => setPersonalInfo({ ...personalInfo, email: e.target.value })}
@@ -322,17 +428,111 @@ export default function ResumeGenerator() {
           </div>
         </Card>
 
-        {/* Download Button */}
-        <div className="flex justify-center">
+        {/* Action Buttons */}
+        <div className="flex flex-wrap gap-4 justify-center">
           <Button
-            onClick={downloadResume}
+            onClick={generatePreview}
+            size="lg"
+            variant="outline"
+            className="gap-2"
+            disabled={!personalInfo.name}
+          >
+            <Eye className="h-5 w-5" />
+            Preview Resume
+          </Button>
+          <Button
+            onClick={downloadPDF}
             size="lg"
             className="gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+            disabled={!personalInfo.name}
           >
             <Download className="h-5 w-5" />
-            Download Resume
+            Download PDF
+          </Button>
+          <Button
+            onClick={copyResume}
+            size="lg"
+            variant="outline"
+            className="gap-2"
+            disabled={!personalInfo.name}
+          >
+            {copied ? (
+              <>
+                <Check className="h-5 w-5" />
+                Copied!
+              </>
+            ) : (
+              <>
+                <Copy className="h-5 w-5" />
+                Copy Resume
+              </>
+            )}
           </Button>
         </div>
+
+        {/* Resume Preview */}
+        {showPreview && personalInfo.name && (
+          <Card className="p-8 bg-white text-black">
+            <div className="max-w-3xl mx-auto space-y-6" style={{ fontFamily: 'Arial, sans-serif' }}>
+              {/* Header */}
+              <div className="text-center border-b-2 border-black pb-4">
+                <h1 className="text-4xl font-bold mb-2">{personalInfo.name}</h1>
+                <p className="text-sm">
+                  {personalInfo.email} | {personalInfo.phone} | {personalInfo.location}
+                </p>
+              </div>
+
+              {/* Summary */}
+              {personalInfo.summary && (
+                <div>
+                  <h2 className="text-xl font-bold mb-2 uppercase">Professional Summary</h2>
+                  <p className="text-sm leading-relaxed">{personalInfo.summary}</p>
+                </div>
+              )}
+
+              {/* Experience */}
+              {experiences.some(exp => exp.title || exp.company) && (
+                <div>
+                  <h2 className="text-xl font-bold mb-3 uppercase">Experience</h2>
+                  {experiences.map((exp, index) => (
+                    exp.title || exp.company ? (
+                      <div key={index} className="mb-4">
+                        <h3 className="font-bold text-base">{exp.title}</h3>
+                        <p className="text-sm italic mb-1">{exp.company} | {exp.duration}</p>
+                        {exp.description && <p className="text-sm leading-relaxed">{exp.description}</p>}
+                      </div>
+                    ) : null
+                  ))}
+                </div>
+              )}
+
+              {/* Education */}
+              {education.some(edu => edu.degree || edu.school) && (
+                <div>
+                  <h2 className="text-xl font-bold mb-3 uppercase">Education</h2>
+                  {education.map((edu, index) => (
+                    edu.degree || edu.school ? (
+                      <div key={index} className="mb-3">
+                        <h3 className="font-bold text-base">{edu.degree}</h3>
+                        <p className="text-sm italic">{edu.school} | {edu.year}</p>
+                      </div>
+                    ) : null
+                  ))}
+                </div>
+              )}
+
+              {/* Skills */}
+              {skills && (
+                <div>
+                  <h2 className="text-xl font-bold mb-3 uppercase">Skills</h2>
+                  <p className="text-sm">
+                    {skills.split(',').map(skill => skill.trim()).join(' • ')}
+                  </p>
+                </div>
+              )}
+            </div>
+          </Card>
+        )}
       </div>
     </ToolLayout>
   );
