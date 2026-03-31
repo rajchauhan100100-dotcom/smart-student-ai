@@ -57,129 +57,164 @@ export default function ResumeGenerator() {
   };
 
   const downloadPDF = () => {
-    const doc = new jsPDF();
-    let yPos = 20;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const contentWidth = pageWidth - (margin * 2);
+    let yPos = margin;
 
-    // Name (Bold, Large)
-    doc.setFontSize(24);
+    // Helper function to check if we need a new page
+    const checkPageBreak = (requiredSpace) => {
+      if (yPos + requiredSpace > pageHeight - margin) {
+        doc.addPage();
+        yPos = margin;
+        return true;
+      }
+      return false;
+    };
+
+    // Name (Bold, Large, Centered)
+    doc.setFontSize(20);
     doc.setFont('helvetica', 'bold');
-    doc.text(personalInfo.name || 'Your Name', 20, yPos);
-    yPos += 10;
-
-    // Contact Info
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    const contactLine = `${personalInfo.email || ''} | ${personalInfo.phone || ''} | ${personalInfo.location || ''}`;
-    doc.text(contactLine, 20, yPos);
+    const nameWidth = doc.getTextWidth(personalInfo.name || 'Your Name');
+    doc.text(personalInfo.name || 'Your Name', (pageWidth - nameWidth) / 2, yPos);
     yPos += 8;
+
+    // Contact Info (Centered)
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    const contactLine = [personalInfo.email, personalInfo.phone, personalInfo.location]
+      .filter(Boolean)
+      .join(' | ');
+    if (contactLine) {
+      const contactWidth = doc.getTextWidth(contactLine);
+      doc.text(contactLine, (pageWidth - contactWidth) / 2, yPos);
+      yPos += 6;
+    }
 
     // Line separator
     doc.setDrawColor(0, 0, 0);
-    doc.line(20, yPos, 190, yPos);
+    doc.setLineWidth(0.5);
+    doc.line(margin, yPos, pageWidth - margin, yPos);
     yPos += 10;
 
     // Summary
     if (personalInfo.summary) {
-      doc.setFontSize(14);
+      checkPageBreak(20);
+      doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
-      doc.text('PROFESSIONAL SUMMARY', 20, yPos);
-      yPos += 7;
+      doc.text('PROFESSIONAL SUMMARY', margin, yPos);
+      yPos += 6;
       
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
-      const summaryLines = doc.splitTextToSize(personalInfo.summary, 170);
-      doc.text(summaryLines, 20, yPos);
-      yPos += (summaryLines.length * 5) + 8;
-    }
-
-    // Experience Section
-    if (experiences.some(exp => exp.title || exp.company)) {
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.text('EXPERIENCE', 20, yPos);
-      yPos += 7;
-
-      experiences.forEach((exp, index) => {
-        if (exp.title || exp.company) {
-          // Job Title
-          doc.setFontSize(11);
-          doc.setFont('helvetica', 'bold');
-          doc.text(exp.title || 'Job Title', 20, yPos);
-          yPos += 5;
-
-          // Company and Duration
-          doc.setFontSize(10);
-          doc.setFont('helvetica', 'italic');
-          doc.text(`${exp.company || 'Company'} | ${exp.duration || 'Duration'}`, 20, yPos);
-          yPos += 5;
-
-          // Description
-          if (exp.description) {
-            doc.setFont('helvetica', 'normal');
-            const descLines = doc.splitTextToSize(exp.description, 170);
-            doc.text(descLines, 20, yPos);
-            yPos += (descLines.length * 5) + 3;
-          }
-          yPos += 3;
-
-          // Check if we need a new page
-          if (yPos > 270) {
-            doc.addPage();
-            yPos = 20;
-          }
-        }
+      const summaryLines = doc.splitTextToSize(personalInfo.summary, contentWidth);
+      summaryLines.forEach(line => {
+        checkPageBreak(6);
+        doc.text(line, margin, yPos);
+        yPos += 5;
       });
       yPos += 5;
     }
 
+    // Experience Section
+    if (experiences.some(exp => exp.title || exp.company)) {
+      checkPageBreak(15);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('EXPERIENCE', margin, yPos);
+      yPos += 6;
+
+      experiences.forEach((exp) => {
+        if (exp.title || exp.company) {
+          checkPageBreak(15);
+          
+          // Job Title
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'bold');
+          doc.text(exp.title || 'Job Title', margin, yPos);
+          yPos += 5;
+
+          // Company and Duration
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'italic');
+          const companyLine = [exp.company, exp.duration].filter(Boolean).join(' | ');
+          if (companyLine) {
+            doc.text(companyLine, margin, yPos);
+            yPos += 5;
+          }
+
+          // Description
+          if (exp.description) {
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            const descLines = doc.splitTextToSize(exp.description, contentWidth);
+            descLines.forEach(line => {
+              checkPageBreak(5);
+              doc.text(line, margin, yPos);
+              yPos += 4.5;
+            });
+          }
+          yPos += 4;
+        }
+      });
+      yPos += 3;
+    }
+
     // Education Section
     if (education.some(edu => edu.degree || edu.school)) {
-      if (yPos > 250) {
-        doc.addPage();
-        yPos = 20;
-      }
-
-      doc.setFontSize(14);
+      checkPageBreak(15);
+      doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
-      doc.text('EDUCATION', 20, yPos);
-      yPos += 7;
+      doc.text('EDUCATION', margin, yPos);
+      yPos += 6;
 
       education.forEach((edu) => {
         if (edu.degree || edu.school) {
+          checkPageBreak(10);
+          
           doc.setFontSize(11);
           doc.setFont('helvetica', 'bold');
-          doc.text(edu.degree || 'Degree', 20, yPos);
+          doc.text(edu.degree || 'Degree', margin, yPos);
           yPos += 5;
 
-          doc.setFontSize(10);
+          doc.setFontSize(9);
           doc.setFont('helvetica', 'italic');
-          doc.text(`${edu.school || 'School'} | ${edu.year || 'Year'}`, 20, yPos);
-          yPos += 8;
+          const schoolLine = [edu.school, edu.year].filter(Boolean).join(' | ');
+          if (schoolLine) {
+            doc.text(schoolLine, margin, yPos);
+            yPos += 6;
+          }
         }
       });
+      yPos += 3;
     }
 
     // Skills Section
     if (skills) {
-      if (yPos > 250) {
-        doc.addPage();
-        yPos = 20;
-      }
-
-      doc.setFontSize(14);
+      checkPageBreak(15);
+      doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
-      doc.text('SKILLS', 20, yPos);
-      yPos += 7;
+      doc.text('SKILLS', margin, yPos);
+      yPos += 6;
 
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
       const skillsText = skills.split(',').map(s => s.trim()).join(' • ');
-      const skillsLines = doc.splitTextToSize(skillsText, 170);
-      doc.text(skillsLines, 20, yPos);
+      const skillsLines = doc.splitTextToSize(skillsText, contentWidth);
+      skillsLines.forEach(line => {
+        checkPageBreak(5);
+        doc.text(line, margin, yPos);
+        yPos += 5;
+      });
     }
 
-    // Save PDF
-    doc.save(`${personalInfo.name.replace(/\s+/g, '_') || 'Resume'}.pdf`);
+    // Save PDF with proper filename
+    const filename = personalInfo.name 
+      ? `${personalInfo.name.replace(/\s+/g, '_')}_Resume.pdf`
+      : 'Resume.pdf';
+    doc.save(filename);
   };
 
   const copyResume = () => {
