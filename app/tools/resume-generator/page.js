@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ToolLayout } from '@/components/ToolLayout';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Download, Plus, X, Copy, Check, Eye } from 'lucide-react';
-import { jsPDF } from 'jspdf';
 
 export default function ResumeGenerator() {
   const [personalInfo, setPersonalInfo] = useState({
@@ -36,6 +35,36 @@ export default function ResumeGenerator() {
   const [showPreview, setShowPreview] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // Add print styles
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @media print {
+        body * {
+          visibility: hidden;
+        }
+        #resume-preview, #resume-preview * {
+          visibility: visible;
+        }
+        #resume-preview {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+        }
+        @page {
+          size: A4;
+          margin: 20mm;
+        }
+        .print-hide {
+          display: none !important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => document.head.removeChild(style);
+  }, []);
+
   const addExperience = () => {
     setExperiences([...experiences, { title: '', company: '', duration: '', description: '' }]);
   };
@@ -57,164 +86,16 @@ export default function ResumeGenerator() {
   };
 
   const downloadPDF = () => {
-    const doc = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 20;
-    const contentWidth = pageWidth - (margin * 2);
-    let yPos = margin;
-
-    // Helper function to check if we need a new page
-    const checkPageBreak = (requiredSpace) => {
-      if (yPos + requiredSpace > pageHeight - margin) {
-        doc.addPage();
-        yPos = margin;
-        return true;
-      }
-      return false;
-    };
-
-    // Name (Bold, Large, Centered)
-    doc.setFontSize(20);
-    doc.setFont('helvetica', 'bold');
-    const nameWidth = doc.getTextWidth(personalInfo.name || 'Your Name');
-    doc.text(personalInfo.name || 'Your Name', (pageWidth - nameWidth) / 2, yPos);
-    yPos += 8;
-
-    // Contact Info (Centered)
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    const contactLine = [personalInfo.email, personalInfo.phone, personalInfo.location]
-      .filter(Boolean)
-      .join(' | ');
-    if (contactLine) {
-      const contactWidth = doc.getTextWidth(contactLine);
-      doc.text(contactLine, (pageWidth - contactWidth) / 2, yPos);
-      yPos += 6;
+    // Generate preview first if not already shown
+    if (!showPreview) {
+      setShowPreview(true);
+      // Wait for preview to render before printing
+      setTimeout(() => {
+        window.print();
+      }, 100);
+    } else {
+      window.print();
     }
-
-    // Line separator
-    doc.setDrawColor(0, 0, 0);
-    doc.setLineWidth(0.5);
-    doc.line(margin, yPos, pageWidth - margin, yPos);
-    yPos += 10;
-
-    // Summary
-    if (personalInfo.summary) {
-      checkPageBreak(20);
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      doc.text('PROFESSIONAL SUMMARY', margin, yPos);
-      yPos += 6;
-      
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      const summaryLines = doc.splitTextToSize(personalInfo.summary, contentWidth);
-      summaryLines.forEach(line => {
-        checkPageBreak(6);
-        doc.text(line, margin, yPos);
-        yPos += 5;
-      });
-      yPos += 5;
-    }
-
-    // Experience Section
-    if (experiences.some(exp => exp.title || exp.company)) {
-      checkPageBreak(15);
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      doc.text('EXPERIENCE', margin, yPos);
-      yPos += 6;
-
-      experiences.forEach((exp) => {
-        if (exp.title || exp.company) {
-          checkPageBreak(15);
-          
-          // Job Title
-          doc.setFontSize(11);
-          doc.setFont('helvetica', 'bold');
-          doc.text(exp.title || 'Job Title', margin, yPos);
-          yPos += 5;
-
-          // Company and Duration
-          doc.setFontSize(9);
-          doc.setFont('helvetica', 'italic');
-          const companyLine = [exp.company, exp.duration].filter(Boolean).join(' | ');
-          if (companyLine) {
-            doc.text(companyLine, margin, yPos);
-            yPos += 5;
-          }
-
-          // Description
-          if (exp.description) {
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            const descLines = doc.splitTextToSize(exp.description, contentWidth);
-            descLines.forEach(line => {
-              checkPageBreak(5);
-              doc.text(line, margin, yPos);
-              yPos += 4.5;
-            });
-          }
-          yPos += 4;
-        }
-      });
-      yPos += 3;
-    }
-
-    // Education Section
-    if (education.some(edu => edu.degree || edu.school)) {
-      checkPageBreak(15);
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      doc.text('EDUCATION', margin, yPos);
-      yPos += 6;
-
-      education.forEach((edu) => {
-        if (edu.degree || edu.school) {
-          checkPageBreak(10);
-          
-          doc.setFontSize(11);
-          doc.setFont('helvetica', 'bold');
-          doc.text(edu.degree || 'Degree', margin, yPos);
-          yPos += 5;
-
-          doc.setFontSize(9);
-          doc.setFont('helvetica', 'italic');
-          const schoolLine = [edu.school, edu.year].filter(Boolean).join(' | ');
-          if (schoolLine) {
-            doc.text(schoolLine, margin, yPos);
-            yPos += 6;
-          }
-        }
-      });
-      yPos += 3;
-    }
-
-    // Skills Section
-    if (skills) {
-      checkPageBreak(15);
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      doc.text('SKILLS', margin, yPos);
-      yPos += 6;
-
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      const skillsText = skills.split(',').map(s => s.trim()).join(' • ');
-      const skillsLines = doc.splitTextToSize(skillsText, contentWidth);
-      skillsLines.forEach(line => {
-        checkPageBreak(5);
-        doc.text(line, margin, yPos);
-        yPos += 5;
-      });
-    }
-
-    // Save PDF with proper filename
-    const filename = personalInfo.name 
-      ? `${personalInfo.name.replace(/\s+/g, '_')}_Resume.pdf`
-      : 'Resume.pdf';
-    doc.save(filename);
   };
 
   const copyResume = () => {
@@ -507,7 +388,7 @@ export default function ResumeGenerator() {
 
         {/* Resume Preview */}
         {showPreview && personalInfo.name && (
-          <Card className="p-8 bg-white text-black">
+          <Card id="resume-preview" className="p-8 bg-white text-black print:shadow-none">
             <div className="max-w-3xl mx-auto space-y-6" style={{ fontFamily: 'Arial, sans-serif' }}>
               {/* Header */}
               <div className="text-center border-b-2 border-black pb-4">
