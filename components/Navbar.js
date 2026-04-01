@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { Menu, X, Sparkles } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
-import { categories } from '@/lib/toolsData';
+import { categories } from '../lib/toolsData';
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);

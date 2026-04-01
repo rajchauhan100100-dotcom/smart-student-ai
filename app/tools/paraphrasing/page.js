@@ -1,12 +1,12 @@
 'use client'
 
 import { useState } from 'react';
-import { ToolLayout, CopyButton } from '@/components/ToolLayout';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { ToolLayout, CopyButton } from '../../../components/ToolLayout';
+import { Textarea } from '../../../components/ui/textarea';
+import { Button } from '../../../components/ui/button';
+import { Card, CardContent } from '../../../components/ui/card';
 import { Loader2, Sparkles, AlertCircle } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription } from '../../../components/ui/alert';
 
 const MAX_CHARS = 5000;
 

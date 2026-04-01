@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { ArrowRight, Sparkles } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardHeader, CardTitle, CardDescription } from './ui/card';
+import { Badge } from './ui/badge';
 
 export function ToolCard({ tool }) {
   const Icon = tool.icon;

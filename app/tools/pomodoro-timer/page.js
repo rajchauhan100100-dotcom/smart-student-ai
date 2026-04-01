@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { ToolLayout } from '@/components/ToolLayout';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ToolLayout } from '../../../components/ToolLayout';
+import { Button } from '../../../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
 import { Play, Pause, RotateCcw, Coffee, Zap } from 'lucide-react';
 
 export default function PomodoroTimer() {

@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { ToolLayout } from '@/components/ToolLayout';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { ToolLayout } from '../../../components/ToolLayout';
+import { Input } from '../../../components/ui/input';
+import { Textarea } from '../../../components/ui/textarea';
+import { Label } from '../../../components/ui/label';
+import { Button } from '../../../components/ui/button';
+import { Card } from '../../../components/ui/card';
 import { Download, Plus, X, Copy, Check, Eye } from 'lucide-react';
 
 export default function ResumeGenerator() {

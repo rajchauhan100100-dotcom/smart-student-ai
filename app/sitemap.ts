@@ -1,8 +1,35 @@
 export default function sitemap() {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://smart-student-ai-5.preview.emergentagent.com';
+  const currentDate = new Date().toISOString();
+
+  // All tool URLs
+  const tools = [
+    'word-counter',
+    'text-summarizer',
+    'paraphrasing',
+    'grammar-corrector',
+    'bio-generator',
+    'resume-generator',
+    'percentage-calculator',
+    'study-planner',
+    'todo-list',
+    'pomodoro-timer'
+  ];
+
+  const toolUrls = tools.map(tool => ({
+    url: `${baseUrl}/tools/${tool}`,
+    lastModified: currentDate,
+    changeFrequency: 'weekly',
+    priority: 0.8,
+  }));
+
   return [
     {
-      url: "https://ai.quicktexttool.in",
-      lastModified: new Date(),
+      url: baseUrl,
+      lastModified: currentDate,
+      changeFrequency: 'daily',
+      priority: 1.0,
     },
+    ...toolUrls
   ];
 }

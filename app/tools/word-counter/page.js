@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react';
-import { ToolLayout } from '@/components/ToolLayout';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ToolLayout } from '../../../components/ToolLayout';
+import { Textarea } from '../../../components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
 import { FileText, Hash, AlignLeft, List } from 'lucide-react';
 
 export default function WordCounter() {

@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { Search, Sparkles, Zap, Shield } from 'lucide-react';
-import { ToolCard } from '@/components/ToolCard';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { tools, categories } from '@/lib/toolsData';
+import { ToolCard } from '../components/ToolCard';
+import { Input } from '../components/ui/input';
+import { Badge } from '../components/ui/badge';
+import { tools, categories } from '../lib/toolsData';
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');

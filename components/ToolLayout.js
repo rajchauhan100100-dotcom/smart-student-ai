@@ -3,7 +3,7 @@
 import { ArrowLeft, Copy, Check } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from './ui/button';
 
 export function ToolLayout({ children, title, description }) {
   const [copied, setCopied] = useState(false);

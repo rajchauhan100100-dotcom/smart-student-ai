@@ -1,12 +1,12 @@
 'use client'
 
 import { useState } from 'react';
-import { ToolLayout, CopyButton } from '@/components/ToolLayout';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ToolLayout, CopyButton } from '../../../components/ToolLayout';
+import { Input } from '../../../components/ui/input';
+import { Label } from '../../../components/ui/label';
+import { Button } from '../../../components/ui/button';
+import { Card, CardContent } from '../../../components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select';
 import { Calendar, Clock } from 'lucide-react';
 
 export default function StudyPlanner() {
