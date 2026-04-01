@@ -39,7 +39,7 @@ export function Footer() {
                 </div>
               </div>
               <span className="font-bold text-xl bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-                Smart Student AI
+                QuickTextTool AI
               </span>
             </div>
             <p className="text-sm text-muted-foreground mb-6 max-w-sm">
@@ -127,7 +127,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="border-t border-border/40 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground text-center md:text-left">
-            © 2025 Smart Student AI Toolkit. All rights reserved.
+            © 2025 QuickTextTool AI. All rights reserved.
           </p>
           <p className="text-sm text-muted-foreground text-center md:text-right">
             Made with ❤️ for students worldwide

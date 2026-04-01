@@ -8,9 +8,9 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  title: 'Smart Student AI Toolkit - Free AI Tools for Students & Job Seekers',
-  description: 'All-in-one AI toolkit with free tools including text summarizer, resume generator, grammar checker, study planner, and more for students and job seekers.',
-  keywords: 'AI tools, student tools, resume generator, text summarizer, grammar checker, study planner, productivity tools',
+  title: 'QuickTextTool AI - Free AI Tools for Students & Professionals',
+  description: 'All-in-one AI toolkit with free tools including text summarizer, resume generator, grammar checker, study planner, and more. No login required.',
+  keywords: 'AI tools, text tools, student tools, resume generator, text summarizer, grammar checker, study planner, productivity tools, free AI',
 };
 
 export default function RootLayout({ children }) {

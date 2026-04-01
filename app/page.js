@@ -238,7 +238,7 @@ export default function Home() {
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Why Choose Smart Student AI?
+              Why Choose QuickTextTool AI?
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               We're committed to providing the best free tools for students and professionals
@@ -307,11 +307,11 @@ export default function Home() {
           <Card className="border-2 bg-gradient-to-br from-blue-500/10 to-purple-600/10 overflow-hidden relative">
             <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
             <CardContent className="pt-12 pb-12 text-center relative z-10">
-              <h2 className="text-3xl md:text-5xl font-bold mb-6">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">
                 Ready to <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">Boost Your Productivity?</span>
               </h2>
               <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                Join thousands of students and professionals using our free AI tools every day
+                Join thousands of students and professionals using QuickTextTool AI every day
               </p>
               <Button 
                 size="lg"

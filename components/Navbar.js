@@ -29,7 +29,7 @@ export function Navbar() {
               </div>
             </div>
             <span className="font-bold text-xl bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-              Smart Student AI
+              QuickTextTool AI
             </span>
           </Link>
 

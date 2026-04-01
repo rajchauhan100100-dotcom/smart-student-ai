@@ -1,6 +1,6 @@
-# Smart Student AI Toolkit
+# QuickTextTool AI
 
-All-in-One AI Toolkit for Students & Job Seekers
+All-in-One AI Toolkit for Students & Professionals
 
 ## Features
 
