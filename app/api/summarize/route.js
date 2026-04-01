@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
+import { callGeminiAPI } from '../../../lib/geminiUtils';
 
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { text, mode, summaryLength, tone, outputFormat } = body;
+    const { text, mode = 'normal', summaryLength = 50, tone = 'neutral', outputFormat = 'paragraph' } = body;
 
-    // Validate input
     if (!text || text.trim().length === 0) {
       return NextResponse.json(
         { error: 'Text is required' },
@@ -13,80 +13,66 @@ export async function POST(request) {
       );
     }
 
-    // Get API key from server environment
     const apiKey = process.env.GEMINI_API_KEY;
     
-    if (!apiKey || apiKey === 'your_gemini_api_key_here') {
+    if (!apiKey) {
       return NextResponse.json(
-        { error: 'Gemini API key not configured on server. Please contact administrator.' },
-        { status: 500 }
+        { error: 'Service temporarily unavailable. Please try again later.' },
+        { status: 503 }
       );
     }
 
-    // Build prompt based on options
-    let prompt = '';
-    
-    if (mode === 'simplify') {
-      prompt = `Simplify the following text into easy-to-understand language suitable for a general audience. Use simple words and short sentences:\n\n${text}`;
-    } else {
-      const lengthInstruction = summaryLength < 33 ? 'very concise (2-3 sentences)' : 
-                               summaryLength < 66 ? 'moderate length (4-6 sentences)' : 
-                               'detailed (7-10 sentences)';
-      
-      const toneInstruction = tone === 'formal' ? 'Use formal, professional language.' :
-                             tone === 'simple' ? 'Use simple, easy-to-understand language.' :
-                             tone === 'bullets' ? 'Format as bullet points.' :
-                             'Extract and list only the key highlights.';
-      
-      const formatInstruction = outputFormat === 'paragraph' ? 'Write in paragraph form.' :
-                               outputFormat === 'bullets' ? 'Format as bullet points with • symbols.' :
-                               'List as numbered key points.';
+    // Build optimized prompt
+    const prompt = buildSummaryPrompt(text, mode, summaryLength, tone, outputFormat);
 
-      prompt = `Summarize the following text in a ${lengthInstruction} summary. ${toneInstruction} ${formatInstruction}\n\nText:\n${text}`;
-    }
-
-    // Call Gemini API from backend
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: prompt
-            }]
-          }]
-        })
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error('Gemini API Error:', data);
-      return NextResponse.json(
-        { error: data.error?.message || 'Failed to generate summary' },
-        { status: response.status }
-      );
-    }
-
-    const result = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    
-    if (!result) {
-      return NextResponse.json(
-        { error: 'No summary generated. Please try again.' },
-        { status: 500 }
-      );
-    }
+    // Call Gemini API with retry logic
+    const result = await callGeminiAPI(apiKey, prompt, { maxRetries: 2 });
 
     return NextResponse.json({ summary: result });
 
   } catch (error) {
-    console.error('Summarize API Error:', error);
+    console.error('Summary API Error:', error);
+    
+    if (error.isQuotaError) {
+      return NextResponse.json(
+        { 
+          error: 'Our AI service is experiencing high demand. Please wait a moment and try again.',
+          retryAfter: 60
+        },
+        { status: 429 }
+      );
+    }
+
     return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
+      { error: error.message || 'Failed to generate summary. Please try again.' },
+      { status: error.statusCode || 500 }
     );
   }
+}
+
+function buildSummaryPrompt(text, mode, summaryLength, tone, outputFormat) {
+  let instruction = `Summarize in ${summaryLength}% length`;
+
+  // Mode
+  if (mode === 'detailed') {
+    instruction += ', keep key details';
+  } else if (mode === 'brief') {
+    instruction += ', very brief';
+  }
+
+  // Tone
+  if (tone === 'formal') {
+    instruction += ', formal tone';
+  } else if (tone === 'casual') {
+    instruction += ', casual tone';
+  }
+
+  // Format
+  if (outputFormat === 'bullets') {
+    instruction += '. Use bullets';
+  }
+
+  instruction += '.\n\n';
+
+  return `${instruction}Text: ${text}`;
 }

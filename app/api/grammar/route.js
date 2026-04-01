@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { callGeminiAPI } from '../../../lib/geminiUtils';
 
 export async function POST(request) {
   try {
@@ -14,54 +15,37 @@ export async function POST(request) {
 
     const apiKey = process.env.GEMINI_API_KEY;
     
-    if (!apiKey || apiKey === 'your_gemini_api_key_here') {
+    if (!apiKey) {
       return NextResponse.json(
-        { error: 'Gemini API key not configured on server. Please contact administrator.' },
-        { status: 500 }
+        { error: 'Service temporarily unavailable. Please try again later.' },
+        { status: 503 }
       );
     }
 
-    const prompt = `Correct the grammar and spelling in the following text. Only return the corrected text without any explanations:\n\n${text}`;
+    // Optimized prompt
+    const prompt = `Fix grammar and spelling. Return corrected text only.\n\nText: ${text}`;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{ text: prompt }]
-          }]
-        })
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error('Gemini API Error:', data);
-      return NextResponse.json(
-        { error: data.error?.message || 'Failed to correct grammar' },
-        { status: response.status }
-      );
-    }
-
-    const result = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    
-    if (!result) {
-      return NextResponse.json(
-        { error: 'No corrected text generated. Please try again.' },
-        { status: 500 }
-      );
-    }
+    // Call Gemini API with retry logic
+    const result = await callGeminiAPI(apiKey, prompt, { maxRetries: 2 });
 
     return NextResponse.json({ corrected: result });
 
   } catch (error) {
     console.error('Grammar API Error:', error);
+    
+    if (error.isQuotaError) {
+      return NextResponse.json(
+        { 
+          error: 'Our AI service is experiencing high demand. Please wait a moment and try again.',
+          retryAfter: 60
+        },
+        { status: 429 }
+      );
+    }
+
     return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
+      { error: error.message || 'Failed to correct grammar. Please try again.' },
+      { status: error.statusCode || 500 }
     );
   }
 }

@@ -9,8 +9,9 @@ import { Label } from '../../../components/ui/label';
 import { Slider } from '../../../components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select';
 import { Badge } from '../../../components/ui/badge';
-import { Loader2, Sparkles, AlertCircle, Download, Copy, Check, RefreshCw, Wand2 } from 'lucide-react';
+import { Loader2, Sparkles, AlertCircle, Download, Copy, Check, RefreshCw, Wand2, Clock } from 'lucide-react';
 import { Alert, AlertDescription } from '../../../components/ui/alert';
+import { useApiCooldown } from '../../../hooks/useApiCooldown';
 
 const MAX_CHARS = 5000;
 
@@ -20,6 +21,7 @@ export default function Paraphrasing() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
+  const { canMakeRequest, secondsRemaining, startCooldown } = useApiCooldown(3);
 
   // Advanced options
   const [mode, setMode] = useState('standard');
@@ -34,14 +36,15 @@ export default function Paraphrasing() {
   };
 
   const handleParaphrase = async () => {
-    if (!text.trim()) return;
+    if (!text.trim() || !canMakeRequest) return;
     
     setLoading(true);
     setError('');
     setParaphrased('');
+    startCooldown();
 
     try {
-      // Call backend API (secure method)
+      // Call backend API (secure method with retry)
       const response = await fetch('/api/paraphrase', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -57,6 +60,7 @@ export default function Paraphrasing() {
       const data = await response.json();
 
       if (!response.ok) {
+        // Show user-friendly error message
         throw new Error(data.error || 'Failed to paraphrase text');
       }
 
@@ -194,13 +198,18 @@ export default function Paraphrasing() {
             <div className="flex flex-wrap gap-3 mt-6">
               <Button
                 onClick={handleParaphrase}
-                disabled={!text.trim() || loading || text.length > MAX_CHARS}
+                disabled={!text.trim() || loading || text.length > MAX_CHARS || !canMakeRequest}
                 className="gap-2 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700"
               >
                 {loading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Paraphrasing...
+                  </>
+                ) : !canMakeRequest ? (
+                  <>
+                    <Clock className="h-4 w-4" />
+                    Wait {secondsRemaining}s
                   </>
                 ) : (
                   <>
@@ -213,7 +222,7 @@ export default function Paraphrasing() {
               {paraphrased && (
                 <Button
                   onClick={handleRephrase}
-                  disabled={loading}
+                  disabled={loading || !canMakeRequest}
                   variant="outline"
                   className="gap-2"
                 >
