@@ -43,61 +43,33 @@ export default function TextSummarizer() {
     setSummary('');
 
     try {
-      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-      
-      if (!apiKey || apiKey === 'your_gemini_api_key_here') {
-        throw new Error('Gemini API key not configured. Please add NEXT_PUBLIC_GEMINI_API_KEY to your .env file.');
-      }
-
-      // Build prompt based on options
-      let prompt = '';
-      
-      if (mode === 'simplify') {
-        prompt = `Simplify the following text into easy-to-understand language suitable for a general audience. Use simple words and short sentences:\n\n${text}`;
-      } else {
-        const lengthInstruction = summaryLength < 33 ? 'very concise (2-3 sentences)' : 
-                                 summaryLength < 66 ? 'moderate length (4-6 sentences)' : 
-                                 'detailed (7-10 sentences)';
-        
-        const toneInstruction = tone === 'formal' ? 'Use formal, professional language.' :
-                               tone === 'simple' ? 'Use simple, easy-to-understand language.' :
-                               tone === 'bullets' ? 'Format as bullet points.' :
-                               'Extract and list only the key highlights.';
-        
-        const formatInstruction = outputFormat === 'paragraph' ? 'Write in paragraph form.' :
-                                 outputFormat === 'bullets' ? 'Format as bullet points with • symbols.' :
-                                 'List as numbered key points.';
-
-        prompt = `Summarize the following text in a ${lengthInstruction} summary. ${toneInstruction} ${formatInstruction}\n\nText:\n${text}`;
-      }
-
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+      // Call backend API (secure method)
+      const response = await fetch('/api/summarize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: prompt
-            }]
-          }]
+          text,
+          mode,
+          summaryLength,
+          tone,
+          outputFormat
         })
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error?.message || 'Failed to summarize text');
+        throw new Error(data.error || 'Failed to generate summary');
       }
 
-      const result = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!result) {
-        throw new Error('No summary generated');
+      if (!data.summary) {
+        throw new Error('No summary generated. Please try again.');
       }
 
-      setSummary(result);
+      setSummary(data.summary);
       setActiveTab('output');
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Failed to generate summary. Please try again.');
     } finally {
       setLoading(false);
     }

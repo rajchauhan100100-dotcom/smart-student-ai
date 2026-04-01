@@ -30,45 +30,26 @@ export default function BioGenerator() {
     setBio('');
 
     try {
-      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-      
-      if (!apiKey || apiKey === 'your_gemini_api_key_here') {
-        throw new Error('Gemini API key not configured. Please add NEXT_PUBLIC_GEMINI_API_KEY to your .env file.');
-      }
-
-      const prompt = `Generate a professional bio for:
-Name: ${formData.name}
-Profession: ${formData.profession}
-${formData.experience ? `Experience: ${formData.experience}` : ''}
-${formData.skills ? `Skills: ${formData.skills}` : ''}
-${formData.achievements ? `Achievements: ${formData.achievements}` : ''}
-
-Write a concise, professional bio (2-3 sentences) suitable for LinkedIn or a resume.`;
-
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+      // Call backend API (secure method)
+      const response = await fetch('/api/bio', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{ text: prompt }]
-          }]
-        })
+        body: JSON.stringify({ details: formData })
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error?.message || 'Failed to generate bio');
+        throw new Error(data.error || 'Failed to generate bio');
       }
 
-      const result = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!result) {
-        throw new Error('No bio generated');
+      if (!data.bio) {
+        throw new Error('No bio generated. Please try again.');
       }
 
-      setBio(result);
+      setBio(data.bio);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Failed to generate bio. Please try again.');
     } finally {
       setLoading(false);
     }

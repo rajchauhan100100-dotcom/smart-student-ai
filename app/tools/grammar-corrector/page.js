@@ -24,38 +24,26 @@ export default function GrammarCorrector() {
     setCorrected('');
 
     try {
-      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-      
-      if (!apiKey || apiKey === 'your_gemini_api_key_here') {
-        throw new Error('Gemini API key not configured. Please add NEXT_PUBLIC_GEMINI_API_KEY to your .env file.');
-      }
-
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+      // Call backend API (secure method)
+      const response = await fetch('/api/grammar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: `Correct the grammar and spelling in the following text. Only return the corrected text without any explanations:\n\n${text}`
-            }]
-          }]
-        })
+        body: JSON.stringify({ text })
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error?.message || 'Failed to correct grammar');
+        throw new Error(data.error || 'Failed to correct grammar');
       }
 
-      const result = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!result) {
-        throw new Error('No corrected text generated');
+      if (!data.corrected) {
+        throw new Error('No corrected text generated. Please try again.');
       }
 
-      setCorrected(result);
+      setCorrected(data.corrected);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Failed to correct grammar. Please try again.');
     } finally {
       setLoading(false);
     }
