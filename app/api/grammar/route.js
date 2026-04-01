@@ -4,7 +4,7 @@ import { callGeminiAPI } from '../../../lib/geminiUtils';
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { text, mode = 'standard', action = 'fix', includeSuggestions = false } = body;
+    const { text, mode = 'standard', action = 'fix', includeSuggestions = false, analyzeWriting = false } = body;
 
     if (!text || text.trim().length === 0) {
       return NextResponse.json(
@@ -22,14 +22,14 @@ export async function POST(request) {
       );
     }
 
-    // Build prompt based on action and mode
-    const prompt = buildGrammarPrompt(text, mode, action, includeSuggestions);
+    // Build prompt based on action
+    const prompt = buildGrammarPrompt(text, mode, action, includeSuggestions, analyzeWriting);
 
     // Call Gemini API with retry logic
     const result = await callGeminiAPI(apiKey, prompt, { maxRetries: 2 });
 
     // Parse response
-    const response = parseGrammarResponse(result, action, includeSuggestions);
+    const response = parseGrammarResponse(result, action, includeSuggestions, analyzeWriting);
 
     return NextResponse.json(response);
 
@@ -53,14 +53,41 @@ export async function POST(request) {
   }
 }
 
-function buildGrammarPrompt(text, mode, action, includeSuggestions) {
+function buildGrammarPrompt(text, mode, action, includeSuggestions, analyzeWriting) {
   let instruction = '';
 
-  // Action-specific instructions
-  if (action === 'fix') {
+  if (analyzeWriting) {
+    // Advanced analysis prompt
+    instruction = `Analyze this text and provide:
+1. CORRECTED: Grammar-corrected version
+2. CLARITY: Score 0-100 based on readability and clarity
+3. READABILITY: Easy, Medium, or Advanced
+4. TONE: Formal, Casual, or Neutral
+
+Format response as:
+CORRECTED: [corrected text]
+CLARITY: [score]
+READABILITY: [level]
+TONE: [tone]
+
+Text: ${text}`;
+    
+  } else if (action === 'rewrite') {
+    // One-click rewrite
+    instruction = 'Rewrite this text to be clearer, more engaging, and professional';
+    
+    const modeInstructions = {
+      standard: '. Keep natural tone',
+      professional: '. Use formal business language',
+      casual: '. Keep it simple and friendly',
+      academic: '. Follow scholarly standards'
+    };
+    instruction += modeInstructions[mode] || modeInstructions.standard;
+    instruction += '.\n\nText: ' + text;
+    
+  } else if (action === 'fix') {
     instruction = 'Fix all grammar, spelling, and punctuation errors';
     
-    // Mode-specific refinements for fix
     const modeInstructions = {
       standard: '. Keep natural tone',
       professional: '. Use formal business language',
@@ -68,11 +95,11 @@ function buildGrammarPrompt(text, mode, action, includeSuggestions) {
       academic: '. Follow strict academic writing standards'
     };
     instruction += modeInstructions[mode] || modeInstructions.standard;
+    instruction += '.\n\nText: ' + text;
     
   } else if (action === 'improve') {
     instruction = 'Improve writing quality';
     
-    // Mode-specific refinements for improve
     const modeInstructions = {
       standard: ': make sentences clearer and more impactful',
       professional: ': enhance professionalism and clarity',
@@ -81,19 +108,72 @@ function buildGrammarPrompt(text, mode, action, includeSuggestions) {
     };
     instruction += modeInstructions[mode] || modeInstructions.standard;
     instruction += '. Fix errors and improve structure';
+    
+    if (includeSuggestions) {
+      instruction += '. Provide 2-3 alternative versions at the end, each on a new line starting with "ALT:"';
+    }
+    
+    instruction += '.\n\nText: ' + text;
   }
 
-  // Add suggestion request if needed
-  if (includeSuggestions) {
-    instruction += '. Provide 2-3 alternative versions at the end, each on a new line starting with "ALT:"';
-  }
-
-  instruction += '. Write naturally. Return only the corrected/improved text.\n\n';
-
-  return `${instruction}Text: ${text}`;
+  return instruction;
 }
 
-function parseGrammarResponse(result, action, includeSuggestions) {
+function parseGrammarResponse(result, action, includeSuggestions, analyzeWriting) {
+  if (analyzeWriting) {
+    // Parse structured analysis
+    const lines = result.split('\n').filter(l => l.trim());
+    let corrected = '';
+    let clarityScore = 0;
+    let readability = 'Medium';
+    let tone = 'Neutral';
+
+    for (const line of lines) {
+      if (line.startsWith('CORRECTED:')) {
+        corrected = line.replace('CORRECTED:', '').trim();
+      } else if (line.startsWith('CLARITY:')) {
+        const scoreMatch = line.match(/\d+/);
+        if (scoreMatch) {
+          clarityScore = parseInt(scoreMatch[0]);
+        }
+      } else if (line.startsWith('READABILITY:')) {
+        const level = line.replace('READABILITY:', '').trim();
+        if (['Easy', 'Medium', 'Advanced'].includes(level)) {
+          readability = level;
+        }
+      } else if (line.startsWith('TONE:')) {
+        const detectedTone = line.replace('TONE:', '').trim();
+        if (['Formal', 'Casual', 'Neutral'].includes(detectedTone)) {
+          tone = detectedTone;
+        }
+      }
+    }
+
+    // If parsing failed, use fallback
+    if (!corrected) {
+      corrected = result.replace(/CORRECTED:|CLARITY:|READABILITY:|TONE:/g, '').trim();
+    }
+
+    return {
+      corrected,
+      clarityScore: Math.min(100, Math.max(0, clarityScore)),
+      readability,
+      tone,
+      analysis: {
+        clarity: getClarityLabel(clarityScore),
+        readability,
+        tone
+      }
+    };
+  }
+
+  if (action === 'rewrite') {
+    return {
+      corrected: result.trim(),
+      suggestions: []
+    };
+  }
+
   if (!includeSuggestions) {
     return {
       corrected: result.trim(),
@@ -118,4 +198,11 @@ function parseGrammarResponse(result, action, includeSuggestions) {
     corrected: mainText.join('\n').trim(),
     suggestions: suggestions.length > 0 ? suggestions : []
   };
+}
+
+function getClarityLabel(score) {
+  if (score >= 90) return 'Excellent';
+  if (score >= 75) return 'Good';
+  if (score >= 60) return 'Fair';
+  return 'Needs Improvement';
 }

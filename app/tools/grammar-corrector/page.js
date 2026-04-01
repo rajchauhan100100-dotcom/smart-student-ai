@@ -24,6 +24,12 @@ export default function GrammarCorrector() {
   const [mode, setMode] = useState('standard');
   const [showHighlights, setShowHighlights] = useState(true);
   const { canMakeRequest, secondsRemaining, startCooldown } = useApiCooldown(3);
+  
+  // Advanced analysis state
+  const [analysis, setAnalysis] = useState(null);
+  const [clarityScore, setClarityScore] = useState(null);
+  const [readability, setReadability] = useState(null);
+  const [tone, setTone] = useState(null);
 
   const handleFixGrammar = async () => {
     if (!text.trim() || !canMakeRequest) return;
@@ -32,6 +38,7 @@ export default function GrammarCorrector() {
     setError('');
     setCorrected('');
     setSuggestions([]);
+    setAnalysis(null);
     startCooldown();
 
     try {
@@ -42,7 +49,8 @@ export default function GrammarCorrector() {
           text,
           mode,
           action: 'fix',
-          includeSuggestions: false
+          includeSuggestions: false,
+          analyzeWriting: true // Get analysis
         })
       });
 
@@ -53,6 +61,14 @@ export default function GrammarCorrector() {
       }
 
       setCorrected(data.corrected || '');
+      
+      // Set analysis data
+      if (data.clarityScore !== undefined) {
+        setClarityScore(data.clarityScore);
+        setReadability(data.readability);
+        setTone(data.tone);
+        setAnalysis(data.analysis);
+      }
     } catch (err) {
       setError(err.message || 'Failed to correct grammar. Please try again.');
     } finally {
@@ -67,6 +83,7 @@ export default function GrammarCorrector() {
     setError('');
     setCorrected('');
     setSuggestions([]);
+    setAnalysis(null);
     startCooldown();
 
     try {
@@ -96,6 +113,50 @@ export default function GrammarCorrector() {
     }
   };
 
+  const handleRewriteBetter = async () => {
+    if (!text.trim() || !canMakeRequest) return;
+    
+    setLoading(true);
+    setError('');
+    setCorrected('');
+    setSuggestions([]);
+    setAnalysis(null);
+    startCooldown();
+
+    try {
+      const response = await fetch('/api/grammar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text,
+          mode,
+          action: 'rewrite',
+          analyzeWriting: true // Get analysis of rewritten version
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to rewrite text');
+      }
+
+      setCorrected(data.corrected || '');
+      
+      // Set analysis data if available
+      if (data.clarityScore !== undefined) {
+        setClarityScore(data.clarityScore);
+        setReadability(data.readability);
+        setTone(data.tone);
+        setAnalysis(data.analysis);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to rewrite text. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const copyText = (textToCopy) => {
     navigator.clipboard.writeText(textToCopy);
     setCopied(true);
@@ -117,6 +178,29 @@ export default function GrammarCorrector() {
     setCorrected('');
     setSuggestions([]);
     setError('');
+    setAnalysis(null);
+    setClarityScore(null);
+    setReadability(null);
+    setTone(null);
+  };
+
+  const getClarityColor = (score) => {
+    if (score >= 90) return 'text-green-500';
+    if (score >= 75) return 'text-blue-500';
+    if (score >= 60) return 'text-yellow-500';
+    return 'text-red-500';
+  };
+
+  const getReadabilityIcon = (level) => {
+    if (level === 'Easy') return '📖';
+    if (level === 'Advanced') return '🎓';
+    return '📚';
+  };
+
+  const getToneIcon = (toneType) => {
+    if (toneType === 'Formal') return '👔';
+    if (toneType === 'Casual') return '😊';
+    return '⚖️';
   };
 
   // Simple diff highlighting (basic version)
@@ -227,6 +311,25 @@ export default function GrammarCorrector() {
               </Button>
 
               <Button
+                onClick={handleRewriteBetter}
+                disabled={!text.trim() || loading || !canMakeRequest}
+                variant="outline"
+                className="gap-2 border-2 border-purple-500/50 text-purple-600 dark:text-purple-400"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Rewriting...
+                  </>
+                ) : (
+                  <>
+                    <Wand2 className="h-4 w-4" />
+                    Rewrite Better
+                  </>
+                )}
+              </Button>
+
+              <Button
                 onClick={clearAll}
                 variant="outline"
                 className="gap-2 text-destructive ml-auto"
@@ -244,6 +347,70 @@ export default function GrammarCorrector() {
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
+        )}
+
+        {/* Advanced Analysis Panel */}
+        {analysis && clarityScore !== null && (
+          <Card className="bg-gradient-to-r from-blue-500/10 to-cyan-600/10 border-2 border-blue-500/30">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Lightbulb className="h-5 w-5 text-blue-500" />
+                <Label className="text-lg font-semibold">Writing Analysis</Label>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Clarity Score */}
+                <div className="p-4 bg-background/50 rounded-lg border">
+                  <div className="text-sm text-muted-foreground mb-1">Clarity Score</div>
+                  <div className="flex items-baseline gap-2">
+                    <span className={`text-3xl font-bold ${getClarityColor(clarityScore)}`}>
+                      {clarityScore}%
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      ({analysis.clarity})
+                    </span>
+                  </div>
+                  <div className="mt-2 w-full bg-muted rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full transition-all ${
+                        clarityScore >= 90 ? 'bg-green-500' :
+                        clarityScore >= 75 ? 'bg-blue-500' :
+                        clarityScore >= 60 ? 'bg-yellow-500' : 'bg-red-500'
+                      }`}
+                      style={{ width: `${clarityScore}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Readability Level */}
+                <div className="p-4 bg-background/50 rounded-lg border">
+                  <div className="text-sm text-muted-foreground mb-1">Readability</div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">{getReadabilityIcon(readability)}</span>
+                    <span className="text-2xl font-semibold">{readability}</span>
+                  </div>
+                  <div className="mt-2 text-xs text-muted-foreground">
+                    {readability === 'Easy' && 'Simple & accessible'}
+                    {readability === 'Medium' && 'Moderate complexity'}
+                    {readability === 'Advanced' && 'Complex & detailed'}
+                  </div>
+                </div>
+
+                {/* Tone Detection */}
+                <div className="p-4 bg-background/50 rounded-lg border">
+                  <div className="text-sm text-muted-foreground mb-1">Detected Tone</div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">{getToneIcon(tone)}</span>
+                    <span className="text-2xl font-semibold">{tone}</span>
+                  </div>
+                  <div className="mt-2 text-xs text-muted-foreground">
+                    {tone === 'Formal' && 'Professional style'}
+                    {tone === 'Casual' && 'Friendly & relaxed'}
+                    {tone === 'Neutral' && 'Balanced approach'}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* Dual View Layout */}
