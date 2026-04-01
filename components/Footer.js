@@ -1,59 +1,137 @@
 'use client'
 
 import Link from 'next/link';
-import { Github, Twitter, Mail } from 'lucide-react';
+import { Github, Twitter, Mail, Sparkles } from 'lucide-react';
 
 export function Footer() {
+  const footerLinks = {
+    product: [
+      { name: 'All Tools', href: '/#tools' },
+      { name: 'Popular Tools', href: '/#popular' },
+      { name: 'AI Tools', href: '/#ai-writing' },
+      { name: 'Student Tools', href: '/#student' }
+    ],
+    company: [
+      { name: 'About Us', href: '/about' },
+      { name: 'Contact', href: '/contact' },
+      { name: 'Blog', href: '/blog' },
+      { name: 'Sitemap', href: '/sitemap.xml' }
+    ],
+    legal: [
+      { name: 'Privacy Policy', href: '/privacy' },
+      { name: 'Terms of Service', href: '/terms' },
+      { name: 'Cookie Policy', href: '/cookies' },
+      { name: 'Disclaimer', href: '/disclaimer' }
+    ]
+  };
+
   return (
-    <footer className="border-t border-border bg-background mt-20">
+    <footer className="border-t border-border/40 bg-muted/30 mt-20">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* About */}
-          <div className="col-span-1 md:col-span-2">
-            <h3 className="font-bold text-lg mb-4 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-              Smart Student AI Toolkit
-            </h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Your all-in-one toolkit for academic success and productivity. Free AI-powered tools for students and job seekers.
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
+          {/* Brand Section */}
+          <div className="lg:col-span-2">
+            <div className="flex items-center space-x-2 mb-4">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur-sm"></div>
+                <div className="relative bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-lg">
+                  <Sparkles className="h-5 w-5 text-white" />
+                </div>
+              </div>
+              <span className="font-bold text-xl bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+                Smart Student AI
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground mb-6 max-w-sm">
+              Your all-in-one toolkit for academic success and productivity. 
+              Free AI-powered tools designed for students and professionals.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+              <a 
+                href="https://twitter.com" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-lg bg-muted hover:bg-primary hover:text-primary-foreground transition-colors"
+              >
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+              <a 
+                href="https://github.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-lg bg-muted hover:bg-primary hover:text-primary-foreground transition-colors"
+              >
                 <Github className="h-5 w-5" />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+              <a 
+                href="mailto:contact@example.com"
+                className="p-2 rounded-lg bg-muted hover:bg-primary hover:text-primary-foreground transition-colors"
+              >
                 <Mail className="h-5 w-5" />
               </a>
             </div>
           </div>
 
-          {/* Tools */}
+          {/* Product Links */}
           <div>
-            <h4 className="font-semibold mb-4">Popular Tools</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/tools/text-summarizer" className="hover:text-foreground transition-colors">Text Summarizer</Link></li>
-              <li><Link href="/tools/resume-generator" className="hover:text-foreground transition-colors">Resume Generator</Link></li>
-              <li><Link href="/tools/grammar-corrector" className="hover:text-foreground transition-colors">Grammar Corrector</Link></li>
-              <li><Link href="/tools/pomodoro-timer" className="hover:text-foreground transition-colors">Pomodoro Timer</Link></li>
+            <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider">Product</h4>
+            <ul className="space-y-3">
+              {footerLinks.product.map((link) => (
+                <li key={link.name}>
+                  <Link 
+                    href={link.href}
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Resources */}
+          {/* Company Links */}
           <div>
-            <h4 className="font-semibold mb-4">Resources</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-foreground transition-colors">About Us</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Contact</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Terms of Service</a></li>
+            <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider">Company</h4>
+            <ul className="space-y-3">
+              {footerLinks.company.map((link) => (
+                <li key={link.name}>
+                  <Link 
+                    href={link.href}
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Legal Links */}
+          <div>
+            <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider">Legal</h4>
+            <ul className="space-y-3">
+              {footerLinks.legal.map((link) => (
+                <li key={link.name}>
+                  <Link 
+                    href={link.href}
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
-          <p>© 2025 Smart Student AI Toolkit. All rights reserved.</p>
+        {/* Bottom Bar */}
+        <div className="border-t border-border/40 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-sm text-muted-foreground text-center md:text-left">
+            © 2025 Smart Student AI Toolkit. All rights reserved.
+          </p>
+          <p className="text-sm text-muted-foreground text-center md:text-right">
+            Made with ❤️ for students worldwide
+          </p>
         </div>
       </div>
     </footer>
