@@ -146,6 +146,8 @@ export default function ResumeGenerator() {
     <ToolLayout
       title="Resume Generator"
       description="Create professional resumes with clean formatting"
+      toolId="resume-generator"
+      category="resume-job"
     >
       <div className="space-y-8">
         {/* Clear All Button */}

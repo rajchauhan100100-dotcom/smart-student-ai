@@ -34,6 +34,8 @@ export default function PercentageCalculator() {
   return (
     <ToolLayout
       title="Percentage Calculator"
+      toolId="percentage-calculator"
+      category="student"
       description="Calculate percentages, increase, and decrease easily"
     >
       <Tabs defaultValue="basic" className="space-y-6">

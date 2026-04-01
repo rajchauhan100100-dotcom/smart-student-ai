@@ -45,6 +45,8 @@ export default function TodoList() {
   return (
     <ToolLayout
       title="To-Do List"
+      toolId="todo-list"
+      category="productivity"
       description="Manage your tasks with a simple to-do list"
     >
       <div className="space-y-6">

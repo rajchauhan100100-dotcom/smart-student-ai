@@ -64,6 +64,8 @@ export default function TextSummarizer() {
   return (
     <ToolLayout
       title="Text Summarizer"
+      toolId="text-summarizer"
+      category="ai-writing"
       description="AI-powered tool to summarize long texts quickly"
     >
       <div className="space-y-6">

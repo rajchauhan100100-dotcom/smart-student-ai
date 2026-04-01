@@ -64,6 +64,8 @@ export default function Paraphrasing() {
   return (
     <ToolLayout
       title="Paraphrasing Tool"
+      toolId="paraphrasing"
+      category="ai-writing"
       description="Rewrite text while maintaining original meaning"
     >
       <div className="space-y-6">

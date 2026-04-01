@@ -1,17 +1,19 @@
 'use client'
 
-import { useState } from 'react';
-import { Search, Sparkles, Zap, Shield, CheckCircle, Star, TrendingUp, Users, ArrowRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Sparkles, Zap, Shield, CheckCircle, Star, TrendingUp, Users, ArrowRight, Clock } from 'lucide-react';
 import { ToolCard } from '../components/ToolCard';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { tools, categories } from '../lib/toolsData';
+import { useRecentTools } from '../hooks/useRecentTools';
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const { recentTools } = useRecentTools();
 
   const filteredTools = tools.filter((tool) => {
     const matchesSearch = tool.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -21,7 +23,12 @@ export default function Home() {
   });
 
   const popularTools = tools.slice(0, 6);
-  const newTools = tools.slice(6, 10);
+  
+  // Get full tool data for recent tools
+  const recentToolsData = recentTools
+    .map(recent => tools.find(t => t.id === recent.slug))
+    .filter(Boolean)
+    .slice(0, 4);
 
   const features = [
     {
@@ -182,6 +189,32 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Recently Used Tools Section */}
+      {recentToolsData.length > 0 && (
+        <section className="py-16 px-4 bg-gradient-to-b from-muted/30 to-background">
+          <div className="container mx-auto max-w-6xl">
+            <div className="text-center mb-12">
+              <Badge className="mb-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0">
+                <Clock className="h-3.5 w-3.5 mr-1" />
+                Recently Used
+              </Badge>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Continue Where You Left Off
+              </h2>
+              <p className="text-muted-foreground text-lg">
+                Quick access to your recently used tools
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {recentToolsData.map((tool) => (
+                <ToolCard key={tool.id} tool={tool} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Popular Tools Section */}
       <section className="py-16 px-4">

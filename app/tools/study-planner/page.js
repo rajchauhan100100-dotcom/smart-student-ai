@@ -79,6 +79,8 @@ ${day.tasks.map(task => `  • ${task}`).join('\n')}
   return (
     <ToolLayout
       title="Study Planner Generator"
+      toolId="study-planner"
+      category="student"
       description="Generate personalized study schedules"
     >
       <div className="space-y-6">

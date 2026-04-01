@@ -64,6 +64,8 @@ export default function GrammarCorrector() {
   return (
     <ToolLayout
       title="Grammar Corrector"
+      toolId="grammar-corrector"
+      category="ai-writing"
       description="Fix grammar and spelling errors instantly"
     >
       <div className="space-y-6">

@@ -77,6 +77,8 @@ Write a concise, professional bio (2-3 sentences) suitable for LinkedIn or a res
   return (
     <ToolLayout
       title="Bio Generator"
+      toolId="bio-generator"
+      category="ai-writing"
       description="Create professional bios for social media and resumes"
     >
       <div className="space-y-6">

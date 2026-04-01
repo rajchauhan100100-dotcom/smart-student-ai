@@ -143,6 +143,8 @@ export default function PomodoroTimer() {
     <ToolLayout
       title="Pomodoro Timer"
       description="Boost productivity with focused work sessions"
+      toolId="pomodoro-timer"
+      category="productivity"
     >
       <div className="space-y-6">
         {/* Settings Panel */}

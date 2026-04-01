@@ -27,6 +27,8 @@ export default function WordCounter() {
     <ToolLayout
       title="Word Counter"
       description="Count words, characters, sentences, and paragraphs instantly"
+      toolId="word-counter"
+      category="productivity"
     >
       <div className="space-y-6">
         <div className="flex justify-end">
@@ -118,6 +120,49 @@ export default function WordCounter() {
               <p className="text-3xl font-bold">{stats.readingTime}<span className="text-base font-normal text-muted-foreground ml-1">min</span></p>
             </CardContent>
           </Card>
+        </div>
+
+        {/* SEO Content with Internal Links */}
+        <div className="mt-12 space-y-6 text-muted-foreground">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground mb-3">
+              What is a Word Counter?
+            </h2>
+            <p className="leading-relaxed">
+              A word counter is an essential online tool that instantly counts words, characters, sentences, and paragraphs in your text. Whether you're a student working on an essay, a content writer optimizing blog posts, or a professional preparing documents, our free word counter helps you track your writing progress and meet specific word limits with precision.
+            </p>
+          </div>
+
+          <div>
+            <h2 className="text-2xl font-bold text-foreground mb-3">
+              How to Use This Word Counter Tool
+            </h2>
+            <p className="leading-relaxed">
+              Simply paste or type your text into the input box above, and our tool will automatically calculate all statistics in real-time. You can also use our <a href="/tools/text-summarizer" className="text-primary hover:underline font-medium">text summarizer</a> to condense long content or the <a href="/tools/paraphrasing" className="text-primary hover:underline font-medium">paraphrasing tool</a> to rewrite text while maintaining word count targets.
+            </p>
+          </div>
+
+          <div>
+            <h2 className="text-2xl font-bold text-foreground mb-3">
+              Key Features
+            </h2>
+            <ul className="space-y-2 list-disc list-inside">
+              <li>Real-time word and character counting</li>
+              <li>Sentence and paragraph analysis</li>
+              <li>Reading time estimation (based on 200 words/minute)</li>
+              <li>Character count with and without spaces</li>
+              <li>Perfect for essays, blogs, social media, and professional documents</li>
+            </ul>
+          </div>
+
+          <div>
+            <h2 className="text-2xl font-bold text-foreground mb-3">
+              Why Use a Word Counter?
+            </h2>
+            <p className="leading-relaxed">
+              Word counters are essential for meeting word limits in academic essays, optimizing SEO content length, staying within social media character restrictions, and improving writing efficiency. Students can ensure their assignments meet requirements, while content writers can optimize for search engines. Our tool also integrates well with other writing aids like our <a href="/tools/grammar-corrector" className="text-primary hover:underline font-medium">grammar checker</a> and <a href="/tools/resume-generator" className="text-primary hover:underline font-medium">resume builder</a> for comprehensive writing support.
+            </p>
+          </div>
         </div>
       </div>
     </ToolLayout>
