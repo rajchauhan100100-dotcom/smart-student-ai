@@ -1,6 +1,6 @@
 export default function sitemap() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://smart-student-ai-5.preview.emergentagent.com';
-  const currentDate = new Date().toISOString();
+  const baseUrl = "https://ai.quicktexttool.in";
+  const currentDate = new Date();
 
   // All tool URLs
   const tools = [
