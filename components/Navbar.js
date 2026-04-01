@@ -14,13 +14,11 @@ export function Navbar() {
 
   const handleSectionScroll = (sectionId) => {
     if (pathname === '/') {
-      // Already on homepage, just scroll
       const element = document.getElementById(sectionId);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     } else {
-      // Navigate to homepage first
       router.push('/');
       setTimeout(() => {
         const element = document.getElementById(sectionId);
@@ -36,7 +34,6 @@ export function Navbar() {
     <nav className="sticky top-0 z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 group cursor-pointer">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur-sm group-hover:blur-md transition-all"></div>
@@ -49,7 +46,6 @@ export function Navbar() {
             </span>
           </Link>
 
-          {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-1">
             <button
               onClick={() => router.push('/')}
@@ -77,7 +73,6 @@ export function Navbar() {
             </button>
           </div>
 
-          {/* Right Side */}
           <div className="hidden md:flex items-center space-x-3">
             <ThemeToggle />
             <Button 
@@ -89,7 +84,6 @@ export function Navbar() {
             </Button>
           </div>
 
-          {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center space-x-2">
             <ThemeToggle />
             <button
@@ -101,7 +95,6 @@ export function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Menu */}
         {isOpen && (
           <div className="md:hidden py-4 border-t border-border/40">
             <button
