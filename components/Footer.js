@@ -18,9 +18,9 @@ export function Footer() {
       { name: 'Sitemap', href: '/sitemap.xml' }
     ],
     legal: [
-      { name: 'Privacy Policy', href: '/privacy' },
+      { name: 'Privacy Policy', href: '/privacy-policy' },
       { name: 'Terms of Service', href: '/terms' },
-      { name: 'Cookie Policy', href: '/cookies' },
+      { name: 'Cookie Policy', href: '/cookie-policy' },
       { name: 'Disclaimer', href: '/disclaimer' }
     ]
   };
