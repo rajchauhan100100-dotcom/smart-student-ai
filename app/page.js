@@ -111,23 +111,29 @@ export default function Home() {
             <div className="flex flex-wrap gap-4 justify-center pt-4">
               <Button 
                 size="lg"
-                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-xl shadow-blue-500/25 text-lg px-8 py-6"
-                asChild
+                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-xl shadow-blue-500/25 text-lg px-8 py-6 cursor-pointer"
+                onClick={() => {
+                  const element = document.getElementById('tools');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
               >
-                <a href="#tools">
-                  Start Using Tools
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </a>
+                Start Using Tools
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               <Button 
                 size="lg"
                 variant="outline"
-                className="border-2 text-lg px-8 py-6"
-                asChild
+                className="border-2 text-lg px-8 py-6 cursor-pointer"
+                onClick={() => {
+                  const element = document.getElementById('about');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
               >
-                <a href="#about">
-                  Explore All Tools
-                </a>
+                Explore All Tools
               </Button>
             </div>
 
@@ -348,13 +354,16 @@ export default function Home() {
               </p>
               <Button 
                 size="lg"
-                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-xl shadow-blue-500/25 text-lg px-10 py-6"
-                asChild
+                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-xl shadow-blue-500/25 text-lg px-10 py-6 cursor-pointer"
+                onClick={() => {
+                  const element = document.getElementById('tools');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
               >
-                <a href="#tools">
-                  Get Started Now - It's Free
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </a>
+                Get Started Now - It's Free
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </CardContent>
           </Card>

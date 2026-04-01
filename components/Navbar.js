@@ -2,26 +2,42 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { Menu, X, Sparkles, ChevronRight } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { Button } from './ui/button';
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
 
-  const navLinks = [
-    { name: 'Home', href: '/' },
-    { name: 'Tools', href: '/#tools' },
-    { name: 'Categories', href: '/#categories' },
-    { name: 'About', href: '/#about' }
-  ];
+  const handleSectionScroll = (sectionId) => {
+    if (pathname === '/') {
+      // Already on homepage, just scroll
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } else {
+      // Navigate to homepage first
+      router.push('/');
+      setTimeout(() => {
+        const element = document.getElementById(sectionId);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 300);
+    }
+    setIsOpen(false);
+  };
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 group">
+          <Link href="/" className="flex items-center space-x-2 group cursor-pointer">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur-sm group-hover:blur-md transition-all"></div>
               <div className="relative bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-lg group-hover:scale-105 transition-transform">
@@ -35,28 +51,41 @@ export function Navbar() {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all"
-              >
-                {link.name}
-              </Link>
-            ))}
+            <button
+              onClick={() => router.push('/')}
+              className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all cursor-pointer"
+            >
+              Home
+            </button>
+            <button
+              onClick={() => handleSectionScroll('tools')}
+              className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all cursor-pointer"
+            >
+              Tools
+            </button>
+            <button
+              onClick={() => handleSectionScroll('categories')}
+              className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all cursor-pointer"
+            >
+              Categories
+            </button>
+            <button
+              onClick={() => handleSectionScroll('about')}
+              className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all cursor-pointer"
+            >
+              About
+            </button>
           </div>
 
           {/* Right Side */}
           <div className="hidden md:flex items-center space-x-3">
             <ThemeToggle />
             <Button 
-              asChild
-              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg shadow-blue-500/25"
+              onClick={() => handleSectionScroll('tools')}
+              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg shadow-blue-500/25 cursor-pointer gap-2"
             >
-              <Link href="/#tools" className="gap-2">
-                Start Now
-                <ChevronRight className="h-4 w-4" />
-              </Link>
+              Start Now
+              <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
 
@@ -65,7 +94,7 @@ export function Navbar() {
             <ThemeToggle />
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="p-2 rounded-lg hover:bg-muted transition-colors"
+              className="p-2 rounded-lg hover:bg-muted transition-colors cursor-pointer"
             >
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -75,24 +104,36 @@ export function Navbar() {
         {/* Mobile Menu */}
         {isOpen && (
           <div className="md:hidden py-4 border-t border-border/40">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="block py-2 px-4 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all"
-                onClick={() => setIsOpen(false)}
-              >
-                {link.name}
-              </Link>
-            ))}
+            <button
+              onClick={() => { router.push('/'); setIsOpen(false); }}
+              className="block w-full text-left py-2 px-4 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all cursor-pointer"
+            >
+              Home
+            </button>
+            <button
+              onClick={() => handleSectionScroll('tools')}
+              className="block w-full text-left py-2 px-4 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all cursor-pointer"
+            >
+              Tools
+            </button>
+            <button
+              onClick={() => handleSectionScroll('categories')}
+              className="block w-full text-left py-2 px-4 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all cursor-pointer"
+            >
+              Categories
+            </button>
+            <button
+              onClick={() => handleSectionScroll('about')}
+              className="block w-full text-left py-2 px-4 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all cursor-pointer"
+            >
+              About
+            </button>
             <div className="mt-4 px-4">
               <Button 
-                asChild
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
+                onClick={() => handleSectionScroll('tools')}
+                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white cursor-pointer"
               >
-                <Link href="/#tools" onClick={() => setIsOpen(false)}>
-                  Start Now
-                </Link>
+                Start Now
               </Button>
             </div>
           </div>

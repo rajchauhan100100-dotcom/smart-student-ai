@@ -31,7 +31,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
           {/* Brand Section */}
           <div className="lg:col-span-2">
-            <div className="flex items-center space-x-2 mb-4">
+            <Link href="/" className="flex items-center space-x-2 mb-4 cursor-pointer w-fit">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur-sm"></div>
                 <div className="relative bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-lg">
@@ -41,7 +41,7 @@ export function Footer() {
               <span className="font-bold text-xl bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
                 QuickTextTool AI
               </span>
-            </div>
+            </Link>
             <p className="text-sm text-muted-foreground mb-6 max-w-sm">
               Your all-in-one toolkit for academic success and productivity. 
               Free AI-powered tools designed for students and professionals.
@@ -80,7 +80,7 @@ export function Footer() {
                 <li key={link.name}>
                   <Link 
                     href={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                   >
                     {link.name}
                   </Link>
@@ -97,7 +97,7 @@ export function Footer() {
                 <li key={link.name}>
                   <Link 
                     href={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                   >
                     {link.name}
                   </Link>
@@ -114,7 +114,7 @@ export function Footer() {
                 <li key={link.name}>
                   <Link 
                     href={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                   >
                     {link.name}
                   </Link>
