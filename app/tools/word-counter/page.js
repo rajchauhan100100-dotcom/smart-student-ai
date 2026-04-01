@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { ToolLayout } from '../../../components/ToolLayout';
 import { Textarea } from '../../../components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
-import { FileText, Hash, AlignLeft, List } from 'lucide-react';
+import { FileText, Hash, AlignLeft, List, Trash2 } from 'lucide-react';
+import { Button } from '../../../components/ui/button';
 
 export default function WordCounter() {
   const [text, setText] = useState('');
@@ -18,12 +19,29 @@ export default function WordCounter() {
     readingTime: Math.ceil((text.trim() ? text.trim().split(/\s+/).length : 0) / 200)
   };
 
+  const clearText = () => {
+    setText('');
+  };
+
   return (
     <ToolLayout
       title="Word Counter"
       description="Count words, characters, sentences, and paragraphs instantly"
     >
       <div className="space-y-6">
+        <div className="flex justify-end">
+          <Button
+            onClick={clearText}
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            disabled={!text}
+          >
+            <Trash2 className="h-4 w-4" />
+            Clear
+          </Button>
+        </div>
+
         <Textarea
           placeholder="Type or paste your text here..."
           className="min-h-[300px] text-base"

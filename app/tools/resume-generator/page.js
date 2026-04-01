@@ -7,7 +7,7 @@ import { Textarea } from '../../../components/ui/textarea';
 import { Label } from '../../../components/ui/label';
 import { Button } from '../../../components/ui/button';
 import { Card } from '../../../components/ui/card';
-import { Download, Plus, X, Copy, Check, Eye } from 'lucide-react';
+import { Download, Plus, X, Copy, Check, Eye, Trash2 } from 'lucide-react';
 
 export default function ResumeGenerator() {
   const [personalInfo, setPersonalInfo] = useState({
@@ -35,11 +35,15 @@ export default function ResumeGenerator() {
   const [showPreview, setShowPreview] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // Add print styles
+  // Add print styles for A4 format
   useEffect(() => {
     const style = document.createElement('style');
     style.innerHTML = `
       @media print {
+        @page {
+          size: A4;
+          margin: 15mm;
+        }
         body * {
           visibility: hidden;
         }
@@ -50,13 +54,10 @@ export default function ResumeGenerator() {
           position: absolute;
           left: 0;
           top: 0;
-          width: 100%;
+          width: 210mm;
+          background: white;
         }
-        @page {
-          size: A4;
-          margin: 20mm;
-        }
-        .print-hide {
+        .no-print {
           display: none !important;
         }
       }
@@ -86,10 +87,8 @@ export default function ResumeGenerator() {
   };
 
   const downloadPDF = () => {
-    // Generate preview first if not already shown
     if (!showPreview) {
       setShowPreview(true);
-      // Wait for preview to render before printing
       setTimeout(() => {
         window.print();
       }, 100);
@@ -133,14 +132,37 @@ export default function ResumeGenerator() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const clearAll = () => {
+    if (confirm('Are you sure you want to clear all data?')) {
+      setPersonalInfo({ name: '', email: '', phone: '', location: '', summary: '' });
+      setExperiences([{ title: '', company: '', duration: '', description: '' }]);
+      setEducation([{ degree: '', school: '', year: '' }]);
+      setSkills('');
+      setShowPreview(false);
+    }
+  };
+
   return (
     <ToolLayout
       title="Resume Generator"
       description="Create professional resumes with clean formatting"
     >
       <div className="space-y-8">
+        {/* Clear All Button */}
+        <div className="flex justify-end no-print">
+          <Button
+            onClick={clearAll}
+            variant="outline"
+            size="sm"
+            className="gap-2 text-destructive"
+          >
+            <Trash2 className="h-4 w-4" />
+            Clear All
+          </Button>
+        </div>
+
         {/* Personal Information */}
-        <Card className="p-6">
+        <Card className="p-6 no-print">
           <h3 className="text-lg font-semibold mb-4">Personal Information</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -188,7 +210,7 @@ export default function ResumeGenerator() {
         </Card>
 
         {/* Experience */}
-        <Card className="p-6">
+        <Card className="p-6 no-print">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold">Experience</h3>
             <Button onClick={addExperience} variant="outline" size="sm" className="gap-2">
@@ -266,7 +288,7 @@ export default function ResumeGenerator() {
         </Card>
 
         {/* Education */}
-        <Card className="p-6">
+        <Card className="p-6 no-print">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold">Education</h3>
             <Button onClick={addEducation} variant="outline" size="sm" className="gap-2">
@@ -332,7 +354,7 @@ export default function ResumeGenerator() {
         </Card>
 
         {/* Skills */}
-        <Card className="p-6">
+        <Card className="p-6 no-print">
           <h3 className="text-lg font-semibold mb-4">Skills</h3>
           <div className="space-y-2">
             <Label>Skills (comma-separated)</Label>
@@ -345,7 +367,7 @@ export default function ResumeGenerator() {
         </Card>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap gap-4 justify-center">
+        <div className="flex flex-wrap gap-4 justify-center no-print">
           <Button
             onClick={generatePreview}
             size="lg"
@@ -380,42 +402,47 @@ export default function ResumeGenerator() {
             ) : (
               <>
                 <Copy className="h-5 w-5" />
-                Copy Resume
+                Copy Text
               </>
             )}
           </Button>
         </div>
 
-        {/* Resume Preview */}
+        {/* Resume Preview - A4 Format */}
         {showPreview && personalInfo.name && (
-          <Card id="resume-preview" className="p-8 bg-white text-black print:shadow-none">
-            <div className="max-w-3xl mx-auto space-y-6" style={{ fontFamily: 'Arial, sans-serif' }}>
+          <Card id="resume-preview" className="p-12 bg-white text-black" style={{ 
+            maxWidth: '210mm',
+            minHeight: '297mm',
+            margin: '0 auto',
+            boxShadow: '0 0 10px rgba(0,0,0,0.1)'
+          }}>
+            <div className="space-y-6" style={{ fontFamily: 'Arial, sans-serif', fontSize: '11pt', lineHeight: '1.5' }}>
               {/* Header */}
               <div className="text-center border-b-2 border-black pb-4">
-                <h1 className="text-4xl font-bold mb-2">{personalInfo.name}</h1>
-                <p className="text-sm">
-                  {personalInfo.email} | {personalInfo.phone} | {personalInfo.location}
+                <h1 className="text-3xl font-bold mb-2" style={{ fontSize: '24pt' }}>{personalInfo.name}</h1>
+                <p className="text-sm" style={{ fontSize: '10pt' }}>
+                  {[personalInfo.email, personalInfo.phone, personalInfo.location].filter(Boolean).join(' | ')}
                 </p>
               </div>
 
               {/* Summary */}
               {personalInfo.summary && (
                 <div>
-                  <h2 className="text-xl font-bold mb-2 uppercase">Professional Summary</h2>
-                  <p className="text-sm leading-relaxed">{personalInfo.summary}</p>
+                  <h2 className="text-lg font-bold mb-2 uppercase" style={{ fontSize: '13pt', borderBottom: '1px solid #333', paddingBottom: '4px' }}>Professional Summary</h2>
+                  <p className="text-sm" style={{ textAlign: 'justify' }}>{personalInfo.summary}</p>
                 </div>
               )}
 
               {/* Experience */}
               {experiences.some(exp => exp.title || exp.company) && (
                 <div>
-                  <h2 className="text-xl font-bold mb-3 uppercase">Experience</h2>
+                  <h2 className="text-lg font-bold mb-3 uppercase" style={{ fontSize: '13pt', borderBottom: '1px solid #333', paddingBottom: '4px' }}>Experience</h2>
                   {experiences.map((exp, index) => (
                     exp.title || exp.company ? (
                       <div key={index} className="mb-4">
-                        <h3 className="font-bold text-base">{exp.title}</h3>
-                        <p className="text-sm italic mb-1">{exp.company} | {exp.duration}</p>
-                        {exp.description && <p className="text-sm leading-relaxed">{exp.description}</p>}
+                        <h3 className="font-bold text-base" style={{ fontSize: '12pt' }}>{exp.title}</h3>
+                        <p className="text-sm italic mb-1" style={{ fontSize: '10pt' }}>{exp.company} | {exp.duration}</p>
+                        {exp.description && <p className="text-sm" style={{ textAlign: 'justify' }}>{exp.description}</p>}
                       </div>
                     ) : null
                   ))}
@@ -425,12 +452,12 @@ export default function ResumeGenerator() {
               {/* Education */}
               {education.some(edu => edu.degree || edu.school) && (
                 <div>
-                  <h2 className="text-xl font-bold mb-3 uppercase">Education</h2>
+                  <h2 className="text-lg font-bold mb-3 uppercase" style={{ fontSize: '13pt', borderBottom: '1px solid #333', paddingBottom: '4px' }}>Education</h2>
                   {education.map((edu, index) => (
                     edu.degree || edu.school ? (
                       <div key={index} className="mb-3">
-                        <h3 className="font-bold text-base">{edu.degree}</h3>
-                        <p className="text-sm italic">{edu.school} | {edu.year}</p>
+                        <h3 className="font-bold text-base" style={{ fontSize: '12pt' }}>{edu.degree}</h3>
+                        <p className="text-sm italic" style={{ fontSize: '10pt' }}>{edu.school} | {edu.year}</p>
                       </div>
                     ) : null
                   ))}
@@ -440,7 +467,7 @@ export default function ResumeGenerator() {
               {/* Skills */}
               {skills && (
                 <div>
-                  <h2 className="text-xl font-bold mb-3 uppercase">Skills</h2>
+                  <h2 className="text-lg font-bold mb-3 uppercase" style={{ fontSize: '13pt', borderBottom: '1px solid #333', paddingBottom: '4px' }}>Skills</h2>
                   <p className="text-sm">
                     {skills.split(',').map(skill => skill.trim()).join(' • ')}
                   </p>
