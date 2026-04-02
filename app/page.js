@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react';
-import { Navbar } from '../components/Navbar';
-import { Footer } from '../components/Footer';
+import { useRouter } from 'next/navigation';
 import { ToolCard } from '../components/ToolCard';
 import { tools } from '../lib/toolsData';
 import { Button } from '../components/ui/button';
@@ -16,6 +15,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const { recentTools } = useRecentTools();
+  const router = useRouter();
 
   // Most popular tools (highlight these)
   const popularToolIds = ['grammar-corrector', 'paraphrasing', 'text-summarizer'];
@@ -46,8 +46,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-      
       {/* HERO SECTION - POWERFUL & STUDENT-FOCUSED */}
       <section className="relative overflow-hidden pt-20 pb-32 px-4">
         {/* Background Effects */}
@@ -82,7 +80,7 @@ export default function Home() {
               <Button
                 size="lg"
                 className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-2xl shadow-blue-500/25 text-lg px-10 py-7 group"
-                onClick={() => window.location.href = '/tools/grammar-corrector'}
+                onClick={() => router.push('/tools/grammar-corrector')}
               >
                 <Sparkles className="h-5 w-5 mr-2" />
                 Fix My Grammar Now
@@ -161,7 +159,7 @@ export default function Home() {
               <Card
                 key={tool.id}
                 className="group relative overflow-hidden border-2 hover:border-blue-500 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/20 cursor-pointer"
-                onClick={() => window.location.href = tool.path}
+                onClick={() => router.push(tool.path)}
               >
                 {/* Popular Badge */}
                 <div className="absolute top-4 right-4 z-10">
@@ -310,7 +308,7 @@ export default function Home() {
           <Button
             size="lg"
             className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white text-lg px-10 py-6"
-            onClick={() => window.location.href = '/tools/grammar-corrector'}
+            onClick={() => router.push('/tools/grammar-corrector')}
           >
             <Sparkles className="h-5 w-5 mr-2" />
             Fix Grammar Now
@@ -371,7 +369,7 @@ export default function Home() {
               <Card
                 key={tool.id}
                 className="group relative overflow-hidden border-2 hover:border-blue-500 transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer"
-                onClick={() => window.location.href = tool.path}
+                onClick={() => router.push(tool.path)}
               >
                 {tool.aiPowered && (
                   <div className="absolute top-4 right-4 z-10">
@@ -525,7 +523,7 @@ export default function Home() {
                   size="lg"
                   variant="outline"
                   className="border-2 text-lg px-10 py-6"
-                  onClick={() => window.location.href = '/about'}
+                  onClick={() => router.push('/about')}
                 >
                   Learn More
                 </Button>
@@ -534,8 +532,6 @@ export default function Home() {
           </Card>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 }
