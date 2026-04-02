@@ -18,9 +18,14 @@ export default function RootLayout({ children }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="google-site-verification" content="GTS9w8j8wQx8HxCrcmjHu_VX3atyV4LYQW6aOJx0bH0" />
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1719926826917839" crossOrigin="anonymous"></script>
       </head>
-        <body className={inter.className}>
+      <body className={inter.className}>
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1719926826917839"
+          crossOrigin="anonymous"
+          strategy="beforeInteractive"
+        />
 
   <Script
     src="https://www.googletagmanager.com/gtag/js?id=G-MMF8DKS9YJ"
