@@ -2,11 +2,22 @@ import { NextResponse } from 'next/server';
 import { callGeminiAPI } from '../../../lib/geminiUtils';
 
 export async function POST(request) {
+  console.log('🟢 [Backend] Grammar API route called');
+  
   try {
     const body = await request.json();
     const { text, mode = 'standard', action = 'fix', includeSuggestions = false, analyzeWriting = false } = body;
 
+    console.log('🟢 [Backend] Request params:', { 
+      textLength: text?.length, 
+      mode, 
+      action, 
+      includeSuggestions, 
+      analyzeWriting 
+    });
+
     if (!text || text.trim().length === 0) {
+      console.log('❌ [Backend] No text provided');
       return NextResponse.json(
         { error: 'Text is required' },
         { status: 400 }
@@ -16,25 +27,34 @@ export async function POST(request) {
     const apiKey = process.env.GEMINI_API_KEY;
     
     if (!apiKey) {
+      console.log('❌ [Backend] API key not found in environment');
       return NextResponse.json(
         { error: 'Service temporarily unavailable. Please try again later.' },
         { status: 503 }
       );
     }
 
+    console.log('🟢 [Backend] API key found, building prompt...');
+
     // Build prompt based on action
     const prompt = buildGrammarPrompt(text, mode, action, includeSuggestions, analyzeWriting);
+
+    console.log('🟢 [Backend] Calling Gemini API...');
 
     // Call Gemini API with retry logic
     const result = await callGeminiAPI(apiKey, prompt, { maxRetries: 2 });
 
+    console.log('🟢 [Backend] Gemini API response received, parsing...');
+
     // Parse response
     const response = parseGrammarResponse(result, action, includeSuggestions, analyzeWriting);
+
+    console.log('✅ [Backend] Success! Returning response');
 
     return NextResponse.json(response);
 
   } catch (error) {
-    console.error('Grammar API Error:', error);
+    console.error('❌ [Backend] Grammar API Error:', error);
     
     if (error.isQuotaError) {
       return NextResponse.json(
@@ -43,6 +63,16 @@ export async function POST(request) {
           retryAfter: 60
         },
         { status: 429 }
+      );
+    }
+
+    if (error.isInvalidKey) {
+      return NextResponse.json(
+        { 
+          error: 'API service configuration issue. Please contact support or try again later.',
+          retryAfter: 60
+        },
+        { status: 503 }
       );
     }
 

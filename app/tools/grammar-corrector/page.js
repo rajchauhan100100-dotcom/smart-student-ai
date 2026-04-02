@@ -34,6 +34,9 @@ export default function GrammarCorrector() {
   const handleFixGrammar = async () => {
     if (!text.trim() || !canMakeRequest) return;
     
+    console.log('🔵 [Frontend] Fix Grammar button clicked');
+    console.log('🔵 [Frontend] Text length:', text.length);
+    
     setLoading(true);
     setError('');
     setCorrected('');
@@ -42,6 +45,9 @@ export default function GrammarCorrector() {
     startCooldown();
 
     try {
+      console.log('🔵 [Frontend] Making API call to /api/grammar');
+      
+      // Call backend API (secure method with retry)
       const response = await fetch('/api/grammar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -54,7 +60,10 @@ export default function GrammarCorrector() {
         })
       });
 
+      console.log('🔵 [Frontend] API response status:', response.status);
+
       const data = await response.json();
+      console.log('🔵 [Frontend] API response data:', data);
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to correct grammar');
@@ -64,12 +73,16 @@ export default function GrammarCorrector() {
       
       // Set analysis data
       if (data.clarityScore !== undefined) {
+        console.log('✅ [Frontend] Analysis received:', data.clarityScore);
         setClarityScore(data.clarityScore);
         setReadability(data.readability);
         setTone(data.tone);
         setAnalysis(data.analysis);
       }
+      
+      console.log('✅ [Frontend] Grammar correction successful');
     } catch (err) {
+      console.error('❌ [Frontend] Error:', err);
       setError(err.message || 'Failed to correct grammar. Please try again.');
     } finally {
       setLoading(false);
