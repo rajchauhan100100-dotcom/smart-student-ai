@@ -39,10 +39,10 @@ export function Navbar() {
               Tools
             </Link>
             <Link
-              href="/#all-tools"
+              href="/blog"
               className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all cursor-pointer"
             >
-              Categories
+              Blog
             </Link>
             <Link
               href="/about"
@@ -91,11 +91,11 @@ export function Navbar() {
               Tools
             </Link>
             <Link
-              href="/#all-tools"
+              href="/blog"
               onClick={() => setIsOpen(false)}
               className="block w-full text-left py-2 px-4 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all cursor-pointer"
             >
-              Categories
+              Blog
             </Link>
             <Link
               href="/about"
