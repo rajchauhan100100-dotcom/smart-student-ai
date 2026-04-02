@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export function useRecentTools() {
   const [recentTools, setRecentTools] = useState([]);
@@ -17,7 +17,7 @@ export function useRecentTools() {
     }
   }, []);
 
-  const addRecentTool = (toolSlug, toolData) => {
+  const addRecentTool = useCallback((toolSlug, toolData) => {
     setRecentTools((prev) => {
       // Remove duplicates and add to front
       const filtered = prev.filter((tool) => tool.slug !== toolSlug);
@@ -27,7 +27,7 @@ export function useRecentTools() {
       localStorage.setItem('recentTools', JSON.stringify(updated));
       return updated;
     });
-  };
+  }, []);
 
   return { recentTools, addRecentTool };
 }
