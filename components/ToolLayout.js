@@ -29,11 +29,9 @@ export function ToolLayout({ children, title, description, toolId, category }) {
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           {/* Back Button */}
-          <Link href="/">
-            <Button variant="ghost" className="mb-6 -ml-4">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Tools
-            </Button>
+          <Link href="/" className="inline-flex items-center mb-6 -ml-4 px-4 py-2 text-sm font-medium rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Tools
           </Link>
 
           {/* Header */}
